@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Twokenize -- a tokenizer designed for Twitter text in English and some other European languages.
@@ -18,13 +19,24 @@ Current home is http://github.com/brendano/ark-tweet-nlp and http://www.ark.cs.c
 There have been at least 2 other Java ports, but they are not in the lineage for the code here.
 
 Ported to Python by Myle Ott <myleott@gmail.com>.
-"""
 
-from __future__ import print_function
+https://github.com/myleott/ark-twokenize-py/blob/master/twokenize.py
+"""
+from __future__ import unicode_literals
 
 import operator
 import re
-import HTMLParser
+import sys
+
+try:
+    from html.parser import HTMLParser
+except ImportError:
+    from HTMLParser import HTMLParser
+
+try:
+    import html
+except ImportError:
+    pass
 
 def regex_or(*items):
     return '(?:' + '|'.join(items) + ')'
@@ -64,7 +76,7 @@ url        = regex_or(urlStart1, urlStart2) + urlBody + "(?=(?:"+urlExtraCrapBef
 timeLike   = r"\d+(?::\d+){1,2}"
 #numNum     = r"\d+\.\d+"
 numberWithCommas = r"(?:(?<!\d)\d{1,3},)+?\d{3}" + r"(?=(?:[^,\d]|$))"
-numComb	 = u"[\u0024\u058f\u060b\u09f2\u09f3\u09fb\u0af1\u0bf9\u0e3f\u17db\ua838\ufdfc\ufe69\uff04\uffe0\uffe1\uffe5\uffe6\u00a2-\u00a5\u20a0-\u20b9]?\\d+(?:\\.\\d+)+%?".encode('utf-8')
+numComb	 = u"[\u0024\u058f\u060b\u09f2\u09f3\u09fb\u0af1\u0bf9\u0e3f\u17db\ua838\ufdfc\ufe69\uff04\uffe0\uffe1\uffe5\uffe6\u00a2-\u00a5\u20a0-\u20b9]?\\d+(?:\\.\\d+)+%?"
 
 # Abbreviations
 boundaryNotDot = regex_or("$", r"\s", r"[“\"?!,:;]", entity)
@@ -73,7 +85,7 @@ aa2  = r"[^A-Za-z](?:[A-Za-z]\.){1,}[A-Za-z](?=" + boundaryNotDot + ")"
 standardAbbreviations = r"\b(?:[Mm]r|[Mm]rs|[Mm]s|[Dd]r|[Ss]r|[Jj]r|[Rr]ep|[Ss]en|[Ss]t)\."
 arbitraryAbbrev = regex_or(aa1, aa2, standardAbbreviations)
 separators  = "(?:--+|―|—|~|–|=)"
-decorations = u"(?:[♫♪]+|[★☆]+|[♥❤♡]+|[\u2639-\u263b]+|[\ue001-\uebbb]+)".encode('utf-8')
+decorations = u"(?:[♫♪]+|[★☆]+|[♥❤♡]+|[\u2639-\u263b]+|[\ue001-\uebbb]+)"
 thingsThatSplitWords = r"[^\s\.,?\"]"
 embeddedApostrophe = thingsThatSplitWords+r"+['’′]" + thingsThatSplitWords + "*"
 
@@ -94,7 +106,7 @@ otherMouths = r"(?:[oO]+|[/\\]+|[vV]+|[Ss]+|[|]+)" # remove forward slash if htt
 
 # myleott: try to be as case insensitive as possible, but still not perfect, e.g., o.O fails
 #bfLeft = u"(♥|0|o|°|v|\\$|t|x|;|\u0ca0|@|ʘ|•|・|◕|\\^|¬|\\*)".encode('utf-8')
-bfLeft = u"(♥|0|[oO]|°|[vV]|\\$|[tT]|[xX]|;|\u0ca0|@|ʘ|•|・|◕|\\^|¬|\\*)".encode('utf-8')
+bfLeft = u"(♥|0|[oO]|°|[vV]|\\$|[tT]|[xX]|;|\u0ca0|@|ʘ|•|・|◕|\\^|¬|\\*)"
 bfCenter = r"(?:[\.]|[_-]+)"
 bfRight = r"\2"
 s3 = r"(?:--['\"])"
@@ -105,7 +117,7 @@ s5 = "(?:[.][_]+[.])"
 basicface = "(?:" +bfLeft+bfCenter+bfRight+ ")|" +s3+ "|" +s4+ "|" + s5
 
 eeLeft = r"[＼\\ƪԄ\(（<>;ヽ\-=~\*]+"
-eeRight= u"[\\-=\\);'\u0022<>ʃ）/／ノﾉ丿╯σっµ~\\*]+".encode('utf-8')
+eeRight= u"[\\-=\\);'\u0022<>ʃ）/／ノﾉ丿╯σっµ~\\*]+"
 eeSymbol = r"[^A-Za-z0-9\s\(\)\*:=-]"
 eastEmote = eeLeft + "(?:"+basicface+"|" +eeSymbol+")+" + eeRight
 
@@ -132,7 +144,7 @@ emoticon = regex_or(
 
 Hearts = "(?:<+/?3+)+" #the other hearts are in decorations
 
-Arrows = regex_or(r"(?:<*[-―—=]*>+|<+[-―—=]*>*)", u"[\u2190-\u21ff]+".encode('utf-8'))
+Arrows = regex_or(r"(?:<*[-―—=]*>+|<+[-―—=]*>*)", u"[\u2190-\u21ff]+")
 
 # BTO 2011-06: restored Hashtag, AtMention protection (dropped in original scala port) because it fixes
 # "hello (#hashtag)" ==> "hello (#hashtag )"  WRONG
@@ -157,7 +169,7 @@ Email = regex_or("(?<=(?:\W))", "(?<=(?:^))") + r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-
 # We will be tokenizing using these regexps as delimiters
 # Additionally, these things are "protected", meaning they shouldn't be further split themselves.
 Protected  = re.compile(
-    unicode(regex_or(
+    regex_or(
         Hearts,
         url,
         Email,
@@ -174,8 +186,7 @@ Protected  = re.compile(
         decorations,
         embeddedApostrophe,
         Hashtag,
-        AtMention
-    ).decode('utf-8')), re.UNICODE)
+        AtMention), re.UNICODE)
 
 # Edge punctuation
 # Want: 'foo' => ' foo '
@@ -277,15 +288,16 @@ def splitToken(token):
     return [token]
 
 # Assume 'text' has no HTML escaping.
-def tweet_ark_tokenize(text):
+def tokenize(text):
     return simpleTokenize(squeezeWhitespace(text))
 
 
 # Twitter text comes HTML-escaped, so unescape it.
 # We also first unescape &amp;'s, in case the text has been buggily double-escaped.
 def normalizeTextForTagger(text):
+    assert sys.version_info[0] >= 3 and sys.version_info[1] > 3, 'Python version >3.3 required'
     text = text.replace("&amp;", "&")
-    text = HTMLParser.HTMLParser().unescape(text)
+    text = html.unescape(text)
     return text
 
 # This is intended for raw tweet text -- we do some HTML entity unescaping before running the tagger.
@@ -294,11 +306,10 @@ def normalizeTextForTagger(text):
 # So the tokens you get back may not exactly correspond to
 # substrings of the original text.
 def tokenizeRawTweetText(text):
-    tokens = tweet_ark_tokenize(normalizeTextForTagger(text))
+    tokens = tokenize(normalizeTextForTagger(text))
     return tokens
 
 
-
 if __name__ == '__main__':
-    text = "I TEST alllll kinds of #hashtags and #HASHTAGS, @mentions and 3000 (http://t.co/dkfjkdf). w/ <3 :) haha!!!!!"
-    print(tweet_ark_tokenize(text))
+    for line in sys.stdin:
+        print(' '.join(tokenizeRawTweetText(line)))

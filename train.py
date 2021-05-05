@@ -1,32 +1,38 @@
-import tensorflow as tf
+import os
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"]="3"
+
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior() 
 from utils import *
 from sklearn.model_selection import KFold
 from models import *
 import time
 import datetime
 
-tf.app.flags.DEFINE_string("dir", "/data", "folder directory")
-tf.app.flags.DEFINE_string("training_file", "clickbait17-validation-170630", "Training data file")
-tf.app.flags.DEFINE_string("validation_file", "clickbait17-train-170331", "Validation data file")
-tf.app.flags.DEFINE_integer("epochs", 20, "epochs")
-tf.app.flags.DEFINE_integer("batch_size", 32, "batch_size")
-tf.app.flags.DEFINE_string("filter_sizes", "3,4,5", "Comma-separated filter sizes")
-tf.app.flags.DEFINE_integer("num_filters", 100, "Number of filters per filter size")
-tf.app.flags.DEFINE_float("dropout_rate_hidden", 0.5, "Dropout rate of hidden layer")
-tf.app.flags.DEFINE_float("dropout_rate_cell", 0.3, "Dropout rate of rnn cell")
-tf.app.flags.DEFINE_float("dropout_rate_embedding", 0.2, "Dropout rate of word embedding")
-tf.app.flags.DEFINE_integer("state_size", 64, "state_size")
-tf.app.flags.DEFINE_integer("hidden_size", 0, "hidden_size")
-tf.app.flags.DEFINE_string("timestamp", "0715", "Timestamp")
-tf.app.flags.DEFINE_integer("y_len", 4, "how to interpret the annotation")
-tf.app.flags.DEFINE_string("model", "SAN", "which model to use")
-tf.app.flags.DEFINE_boolean("use_target_description", False, "whether to use the target description as input")
-tf.app.flags.DEFINE_boolean("use_image", False, "whether to use the image as input")
-tf.app.flags.DEFINE_float("learning_rate", 0.005, "learning rate")
-tf.app.flags.DEFINE_integer("embedding_size", 100, "embedding size")
-tf.app.flags.DEFINE_float("gradient_clipping_value", 2, "gradient clipping value")
+tf.compat.v1.flags.DEFINE_string("dir", "/home/vaclav.blahut/data/vena/cc2017", "folder directory")
+tf.compat.v1.flags.DEFINE_string("training_file", "clickbait17-validation-170630", "Training data file")
+tf.compat.v1.flags.DEFINE_string("validation_file", "clickbait17-validation-170630", "Validation data file")
+tf.compat.v1.flags.DEFINE_integer("epochs", 20, "epochs")
+tf.compat.v1.flags.DEFINE_integer("batch_size", 32, "batch_size")
+tf.compat.v1.flags.DEFINE_string("filter_sizes", "3,4,5", "Comma-separated filter sizes")
+tf.compat.v1.flags.DEFINE_integer("num_filters", 100, "Number of filters per filter size")
+tf.compat.v1.flags.DEFINE_float("dropout_rate_hidden", 0.5, "Dropout rate of hidden layer")
+tf.compat.v1.flags.DEFINE_float("dropout_rate_cell", 0.3, "Dropout rate of rnn cell")
+tf.compat.v1.flags.DEFINE_float("dropout_rate_embedding", 0.2, "Dropout rate of word embedding")
+tf.compat.v1.flags.DEFINE_integer("state_size", 64, "state_size")
+tf.compat.v1.flags.DEFINE_integer("hidden_size", 0, "hidden_size")
+tf.compat.v1.flags.DEFINE_string("timestamp", "0715", "Timestamp")
+tf.compat.v1.flags.DEFINE_integer("y_len", 4, "how to interpret the annotation")
+tf.compat.v1.flags.DEFINE_string("model", "SAN", "which model to use")
+tf.compat.v1.flags.DEFINE_boolean("use_target_description", False, "whether to use the target description as input")
+tf.compat.v1.flags.DEFINE_boolean("use_image", False, "whether to use the image as input")
+tf.compat.v1.flags.DEFINE_float("learning_rate", 0.005, "learning rate")
+tf.compat.v1.flags.DEFINE_integer("embedding_size", 100, "embedding size")
+tf.compat.v1.flags.DEFINE_float("gradient_clipping_value", 2, "gradient clipping value")
 
-FLAGS = tf.app.flags.FLAGS
+FLAGS = tf.compat.v1.flags.FLAGS
 
 
 def main(argv=None):
@@ -47,7 +53,7 @@ def main(argv=None):
     post_text_lens = post_text_lens[shuffle_indices]
     truth_means = truth_means[shuffle_indices]
     max_post_text_len = max(post_text_lens)
-    print max_post_text_len
+    print(max_post_text_len)
     post_texts = pad_sequences(post_texts, max_post_text_len)
 
     target_descriptions = np.array(target_descriptions)
@@ -55,7 +61,7 @@ def main(argv=None):
     target_descriptions = target_descriptions[shuffle_indices]
     target_description_lens = target_description_lens[shuffle_indices]
     max_target_description_len = max(target_description_lens)
-    print max_target_description_len
+    print(max_target_description_len)
     target_descriptions = pad_sequences(target_descriptions, max_target_description_len)
 
     image_features = np.array(image_features)
@@ -69,8 +75,8 @@ def main(argv=None):
         train_data, validation_data = data[train], data[validation]
         g = tf.Graph()
         with g.as_default() as g:
-            tf.set_random_seed(81)
-            with tf.Session(graph=g) as sess:
+            tf.random.set_seed(81)
+            with tf.compat.v1.Session(graph=g) as sess:
                 if FLAGS.model == "DAN":
                     model = DAN(x1_maxlen=max_post_text_len, y_len=len(truth_classes[0]), x2_maxlen=max_target_description_len, embedding=embedding, filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))), num_filters=FLAGS.num_filters, hidden_size=FLAGS.hidden_size, state_size=FLAGS.state_size, x3_size=len(image_features[0]))
                 if FLAGS.model == "CNN":
@@ -161,10 +167,10 @@ def main(argv=None):
         round += 1
         val_scores.append(min_mse_val)
         val_accs.append(acc)
-    print np.mean(val_scores)
-    print np.mean(val_accs)
+    print(np.mean(val_scores))
+    print(np.mean(val_accs))
 
 
 if __name__ == "__main__":
-    tf.app.run()
+    tf.compat.v1.app.run()
 
