@@ -17,7 +17,7 @@ UNK = "<unk>"  # reserve 1 for unknown
 # tokeniser = nltk.tokenize.stanford.StanfordTokenizer(path_to_jar='./stanford-postagger.jar')
 # java_path = "/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home"
 # os.environ['JAVAHOME'] = java_path
-nltk_tokeniser = nltk.tokenize.TweetTokenizer()
+# nltk_tokeniser = nltk.tokenize.TweetTokenizer()
 np.random.seed(81)
 
 
@@ -59,13 +59,16 @@ def process_tweet(text):
 
     return text
 
-
+flatten = lambda t: [item for sublist in t for item in sublist]
+tokenizer = nltk.RegexpTokenizer(r"\w+")
 def tokenise(text, with_process=True):
-    if with_process:
-        return nltk_tokeniser.tokenize(process_tweet(text).lower())
-    else:
-        # return nltk_tokeniser.tokenize(text)
-        return tweet_ark_tokenize(text.lower())
+    return flatten(tokenizer.tokenize(sentence) for sentence in nltk.tokenize.sent_tokenize(text.lower()))
+    # return nltk_tokeniser.tokenize(text.lower())
+    # if with_process:
+    #     return nltk_tokeniser.tokenize(process_tweet(text).lower())
+    # else:
+    #     # return nltk_tokeniser.tokenize(text)
+    #     return tweet_ark_tokenize(text.lower())
 
 
 def load_embeddings(fp, embedding_size):

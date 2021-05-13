@@ -2,10 +2,16 @@
 ## Corresponding report: https://arxiv.org/abs/1710.05364
 
 ## Steps:
+0. Create conda env:
+```
+conda create -y -n p37_tf1 python=3.7
+conda activate p37_tf1
+conda install tensorflow-gpu==1.15.0
+```
 1. Download glove: `wget http://nlp.stanford.edu/data/glove.6B.zip && unzip glove.6B.zip`
 2. Change `dir` flag in `train.py` to correct directory.
 3. Install:
-    - pip install Pillow hickle
+    - pip install Pillow hickle nltk gensim scikit-learn python-Levenshtein
 4. Download training data: `wget -O ./clickbait17-train-170630.zip https://zenodo.org/record/3346491/files/clickbait17-train-170630.zip?download=1`
 5. TODO split data into training and validation
 6. `python train.py`
