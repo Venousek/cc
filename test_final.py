@@ -1,3 +1,7 @@
+import os
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"]="" # too many test examples can cause OOM - running on CPU fixes this
+
 import tensorflow as tf
 from utils import *
 from sklearn.model_selection import KFold
@@ -13,7 +17,7 @@ tf.app.flags.DEFINE_string("train_file", "hp_articles_202103_train", "Train data
 tf.app.flags.DEFINE_string("test_file", "hp_articles_202103_test", "Test data file")
 tf.app.flags.DEFINE_string("output_directory", "test_output", "Output directory")
 tf.app.flags.DEFINE_string("timestamp", "0715", "Timestamp")
-tf.app.flags.DEFINE_integer("max_post_text_len", 154, "Max length of the post text")
+tf.app.flags.DEFINE_integer("max_post_text_len", 152, "Max length of the post text")
 tf.app.flags.DEFINE_integer("max_target_description_len", 0, "Max length of the target description")
 tf.app.flags.DEFINE_integer("if_annotated", 2, "number of classes, >=1 if the Test data come with the annotations, 0 otherwise")
 tf.app.flags.DEFINE_string("model", "SAN", "which model to use")
@@ -113,4 +117,4 @@ def main(argv=None):
         print("saved")
 
 if __name__ == "__main__":
-    tf.app.run()
+    tf.compat.v1.app.run()
