@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]="3"
+os.environ["CUDA_VISIBLE_DEVICES"]=""
 
 import tensorflow as tf
 # import tensorflow.compat.v1 as tf
@@ -11,11 +11,11 @@ from models import *
 import time
 import datetime
 
-tf.app.flags.DEFINE_string("dir", "/home/vaclav.blahut/data/vena/cc2017/hpfeed", "folder directory")
+tf.app.flags.DEFINE_string("dir", "/home/vaclav.blahut/data/vena/cc2017/hpfeed_ft_cc", "folder directory")
 tf.app.flags.DEFINE_string("training_file", "hp_articles_202103_train", "Training data file")
 # tf.app.flags.DEFINE_string("validation_file", "clickbait17-test-170630", "Validation data file")
 tf.app.flags.DEFINE_integer("epochs", 20, "epochs")
-tf.app.flags.DEFINE_integer("batch_size", 128, "batch_size")
+tf.app.flags.DEFINE_integer("batch_size", 32, "batch_size")
 tf.app.flags.DEFINE_string("filter_sizes", "3,4,5", "Comma-separated filter sizes")
 tf.app.flags.DEFINE_integer("num_filters", 100, "Number of filters per filter size")
 tf.app.flags.DEFINE_float("dropout_rate_hidden", 0.5, "Dropout rate of hidden layer")
@@ -29,8 +29,8 @@ tf.app.flags.DEFINE_string("model", "SAN", "which model to use")
 tf.app.flags.DEFINE_boolean("use_target_description", False, "whether to use the target description as input")
 tf.app.flags.DEFINE_boolean("use_image", False, "whether to use the image as input")
 tf.app.flags.DEFINE_float("learning_rate", 0.005, "learning rate")
-tf.app.flags.DEFINE_string("embedding_file", "glove_cz.100d.txt", "embedding file name")
-tf.app.flags.DEFINE_integer("embedding_size", 100, "embedding size")
+tf.app.flags.DEFINE_string("embedding_file", "cc.cs.300.txt", "embedding file name")
+tf.app.flags.DEFINE_integer("embedding_size", 300, "embedding size")
 tf.app.flags.DEFINE_float("gradient_clipping_value", 2, "gradient clipping value")
 
 FLAGS = tf.app.flags.FLAGS
@@ -77,8 +77,8 @@ def main(argv=None):
         train_data, validation_data = data[train], data[validation]
         g = tf.Graph()
         with g.as_default() as g:
-            tf.random.set_random_seed(81)
-            with tf.Session(graph=g) as sess:
+            tf.compat.v1.random.set_random_seed(81)
+            with tf.compat.v1.Session(graph=g) as sess:
                 if FLAGS.model == "DAN":
                     model = DAN(x1_maxlen=max_post_text_len, y_len=len(truth_classes[0]), x2_maxlen=max_target_description_len, embedding=embedding, filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))), num_filters=FLAGS.num_filters, hidden_size=FLAGS.hidden_size, state_size=FLAGS.state_size, x3_size=len(image_features[0]))
                 if FLAGS.model == "CNN":

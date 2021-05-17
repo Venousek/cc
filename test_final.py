@@ -12,7 +12,7 @@ from sklearn.metrics import mean_squared_error as mse
 from sklearn.metrics import accuracy_score as acc
 import argparse
 
-tf.app.flags.DEFINE_string("dir", "/home/vaclav.blahut/data/vena/cc2017/hpfeed/", "folder directory")
+tf.app.flags.DEFINE_string("dir", "/home/vaclav.blahut/data/vena/cc2017/hpfeed_ft_cc/", "folder directory")
 tf.app.flags.DEFINE_string("train_file", "hp_articles_202103_train", "Train data file")
 tf.app.flags.DEFINE_string("test_file", "hp_articles_202103_test", "Test data file")
 tf.app.flags.DEFINE_string("output_directory", "test_output", "Output directory")
